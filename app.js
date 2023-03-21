@@ -57,6 +57,10 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/message', messageRouter);
 app.use('/api/v1/dialogue', dialogueRouter);
 
+app.use('/', (req, res) => {
+  res.status(200).json({ message: "Welcome to messanger homepage!" })
+})
+
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
