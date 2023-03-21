@@ -29,7 +29,6 @@
     "nodemailer": "^6.8.0",
     "socket.io": "^4.6.1",
     "validator": "^13.6.0",
-    "vercel": "^28.17.0",
     "ws": "^8.13.0",
     "xss-clean": "^0.1.1"
   },
