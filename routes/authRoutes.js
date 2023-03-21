@@ -12,6 +12,12 @@ const {
 } = require('../controllers/authController');
 const { authenticateUser } = require('../middleware/authentication');
 
+const {
+  showCurrentUser,
+} = require('../controllers/userController');
+
+router.route('/showMe').get(authenticateUser, showCurrentUser);
+
 router.post('/register', register);
 router.post('/login', login);
 router.delete('/logout', authenticateUser, logout);

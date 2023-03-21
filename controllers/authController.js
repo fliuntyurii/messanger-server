@@ -9,7 +9,7 @@ const CustomError = require('../errors');
 const { attachCookiesToResponse, createTokenUser } = require('../utils');
 
 const register = async (req, res) => {
-  const { email, name, password } = req.body;
+  const { email, name, password, username } = req.body;
 
   const emailAlreadyExists = await User.findOne({ email });
   if (emailAlreadyExists) {
@@ -21,7 +21,7 @@ const register = async (req, res) => {
   const verificationToken = crypto.randomBytes(40).toString('hex');
   const isVerified = false;
 
-  const user = await User.create({ name, email, password, role, verificationToken, isVerified });
+  const user = await User.create({ name, email, password, role, verificationToken, isVerified, username });
   const tokenUser = createTokenUser(user);
 
   const message = `<i>Hello, ${name}. To complete your sign up, please verify your email: 
@@ -159,11 +159,14 @@ const updateForgottenPassword = async (req, res) => {
   if (!password || !confirmPassword) {
     throw new CustomError.BadRequestError('Please provide password');
   }
-  if (!user || password !== confirmPassword || user.passwordToken !== token) {
+  if (!user || password !== confirmPassword) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials');
   }
+  if (user.passwordToken !== token) {
+    throw new CustomError.UnauthenticatedError('Token has expired');
+  }
 
-  // user.password = hashPassword;
+  user.password = hashPassword;
   user.passwordToken = null;
   user.passwordTokenExpirationDate = null;
 

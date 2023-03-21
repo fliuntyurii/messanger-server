@@ -13,12 +13,19 @@ const getAllUsers = async (req, res) => {
 };
 
 const getSingleUser = async (req, res) => {
-  const user = await User.findOne({ _id: req.params.id }).select('-password');
+  const user = await User.findOne({ username: req.body.username }).select('-password');
   if (!user) {
-    throw new CustomError.NotFoundError(`No user with id : ${req.params.id}`);
+    throw new CustomError.NotFoundError(`No user with username : ${req.body.username}`);
   }
   checkPermissions(user, user._id);
-  res.status(StatusCodes.OK).json({ user });
+  res.status(StatusCodes.OK).json({ 
+    id: user._id,
+    email: user.email,
+    name: user.name,
+    username: user.username,
+    bio: user.bio,
+    image: user.image
+  });
 };
 
 const showCurrentUser = async (req, res) => {

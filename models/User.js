@@ -9,6 +9,13 @@ const UserSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 50,
   },
+  username: {
+    type: String,
+    unique: true,
+    required: [true, 'Please provide username'],
+    minlength: 4,
+    maxlength: 12,
+  },
   email: {
     type: String,
     unique: true,
@@ -38,6 +45,22 @@ const UserSchema = new mongoose.Schema({
   passwordTokenExpirationDate: {
     type: Date,
   },
+  dialogues: {
+    type: Array,
+    default: []
+  },
+  language: {
+    type: String,
+    default: 'en'
+  },
+  image: {
+    type: String,
+    default: ''
+  },
+  bio: {
+    type: String,
+    default: ''
+  }
 });
 
 UserSchema.pre('save', async function () {

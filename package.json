@@ -1,5 +1,5 @@
 {
-  "name": "10-e-commerce-api",
+  "name": "messanger",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -27,7 +27,9 @@
     "mongoose": "^6.0.8",
     "morgan": "^1.10.0",
     "nodemailer": "^6.8.0",
+    "socket.io": "^4.6.1",
     "validator": "^13.6.0",
+    "ws": "^8.13.0",
     "xss-clean": "^0.1.1"
   },
   "devDependencies": {
