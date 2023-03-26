@@ -25,7 +25,7 @@ router.delete('/logout', authenticateUser, logout);
 router.put('/verify', verifyAccount);
 router.get('/verifyMessage', authenticateUser, resendMsgToVerify);
 
-router.get('/forgotPassword', forgotPassword);
+router.post('/forgotPassword', forgotPassword);
 router.put('/reset-password', updateForgottenPassword);
 
 module.exports = router;
