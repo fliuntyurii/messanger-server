@@ -25,7 +25,7 @@ const register = async (req, res) => {
   const tokenUser = createTokenUser(user);
 
   const message = `<i>Hello, ${name}. To complete your sign up, please verify your email: 
-    <a href="http://${process.env.BASE_URL}/auth/verify?token=${user.verificationToken}&id=${user._id}">CLICK</a>.
+    <a href="http://${process.env.BASE_URL}/verify?token=${user.verificationToken}&id=${user._id}">CLICK</a>.
     The YuriiTeam!</i>`;
   await mailSandler(email, 'Verify Your Email', message);
 
@@ -116,7 +116,7 @@ const resendMsgToVerify = async (req, res) => {
   }
 
   const message = `<i>Hello, ${user.name}. To complete your sign up, please verify your email: 
-    <a href="http://${process.env.BASE_URL}/auth/verify?token=${user.verificationToken}&id=${user._id}">CLICK</a>.
+    <a href="http://${process.env.BASE_URL}/verify?token=${user.verificationToken}&id=${user._id}">CLICK</a>.
     The YuriiTeam!</i>`;
   await mailSandler(email, 'Verify Your Email', message);
 
@@ -141,7 +141,7 @@ const forgotPassword = async (req, res) => {
   user.passwordTokenExpirationDate = passwordTokenExpirationDate;
   await user.save();
 
-  const message = `<i>Follow the link to reset password: <a href="http://${process.env.BASE_URL}/auth/reset-password?token=${user.passwordToken}&email=${email}">LINK</a>.
+  const message = `<i>Follow the link to reset password: <a href="http://${process.env.BASE_URL}/reset-password?token=${user.passwordToken}&email=${email}">LINK</a>.
   The YuriiTeam!</i>`;
   await mailSandler(email, 'Reset Password', message);
 
