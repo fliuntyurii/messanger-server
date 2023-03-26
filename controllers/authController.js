@@ -9,7 +9,7 @@ const CustomError = require('../errors');
 const { attachCookiesToResponse, createTokenUser } = require('../utils');
 
 const register = async (req, res) => {
-  const { email, name, password, username } = req.body;
+  const { email, name, password, username, bio } = req.body;
 
   const emailAlreadyExists = await User.findOne({ email });
   if (emailAlreadyExists) {
@@ -21,7 +21,7 @@ const register = async (req, res) => {
   const verificationToken = crypto.randomBytes(40).toString('hex');
   const isVerified = false;
 
-  const user = await User.create({ name, email, password, role, verificationToken, isVerified, username });
+  const user = await User.create({ name, email, password, role, verificationToken, isVerified, username, bio });
   const tokenUser = createTokenUser(user);
 
   const message = `<i>Hello, ${name}. To complete your sign up, please verify your email: 
