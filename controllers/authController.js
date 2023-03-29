@@ -75,7 +75,7 @@ const login = async (req, res) => {
       throw new CustomError.UnauthenticatedError('Invalid Credentials');
     }
     refreshToken = existingToken.refreshToken;
-    attachCookiesToResponse({ refreshToken });
+    attachCookiesToResponse({ res, user: tokenUser, refreshToken });
     res.status(StatusCodes.OK).json({ user: tokenUser });
     return;
   }
