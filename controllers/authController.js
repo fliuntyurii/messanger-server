@@ -87,6 +87,7 @@ const login = async (req, res) => {
   
   await Token.create(userToken);
   attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+  res.cookie('myCookie', 'cookieValue', { sameSite: 'none', secure: true });
   res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 
