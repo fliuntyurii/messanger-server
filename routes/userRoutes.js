@@ -8,12 +8,11 @@ const {
 const {
   getAllUsers,
   getSingleUser,
-  showCurrentUser,
   updateUser,
   updateUserPassword,
 } = require('../controllers/userController');
 
-router.route('/').get(authenticateUser, authorizePermissions('admin'), getAllUsers);
+router.route('/').get(authenticateUser, getAllUsers);
 router.route('/find-user').get(authenticateUser, getSingleUser);
 
 router.route('/updateUser').patch(authenticateUser, updateUser);

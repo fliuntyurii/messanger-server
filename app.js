@@ -4,6 +4,7 @@ require('express-async-errors');
 const express = require('express');
 const socketio = require('socket.io');
 const http = require('http');
+const mongoose = require('mongoose');
 
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
@@ -60,10 +61,13 @@ app.use('/api/v1/dialogue', dialogueRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
+mongoose.set('strictQuery', true);
+
 const port = process.env.PORT || 5000;
 const start = async () => {
   try {
     await connectDB(process.env.MONGO_URL);
+    
     server.listen(port, () =>
       console.log(`Server is listening on port ${port}...`)
     );

@@ -9,7 +9,11 @@ const CustomError = require('../errors');
 const { attachCookiesToResponse, createTokenUser } = require('../utils');
 
 const register = async (req, res) => {
-  const { email, name, password, username, bio } = req.body;
+  const { email, name, password, username, bio, image } = req.body;
+
+  if (!email || !name || !password) {
+    throw new CustomError.BadRequestError('Please provide email and password');
+  }
 
   const emailAlreadyExists = await User.findOne({ email });
   if (emailAlreadyExists) {
@@ -21,16 +25,27 @@ const register = async (req, res) => {
   const verificationToken = crypto.randomBytes(40).toString('hex');
   const isVerified = false;
 
-  const user = await User.create({ name, email, password, role, verificationToken, isVerified, username, bio });
+  const user = await User.create({ 
+    email,
+    name,
+    username: username || '',
+    bio: bio || '',
+    image: image || '',
+    password,
+    role,
+    verificationToken,
+    isVerified
+  });
   const tokenUser = createTokenUser(user);
 
-  const message = `<i>Hello, ${name}. To complete your sign up, please verify your email: 
-    <a href="http://${process.env.BASE_URL}/verify?token=${user.verificationToken}&id=${user._id}">CLICK</a>.
-    The YuriiTeam!</i>`;
+  const message = 
+    `<i>Hello, ${name}. To complete your sign up, please verify your email: 
+    <a href="http://${process.env.CLIENT_URL}/verify?token=${user.verificationToken}&id=${user._id}">CLICK</a>.
+    PUSLE MESSANGER!</i>`;
   await mailSandler(email, 'Verify Your Email', message);
 
   attachCookiesToResponse({ res, user: tokenUser });
-  res.status(StatusCodes.CREATED).json({ user: tokenUser });
+  res.status(StatusCodes.CREATED).json({ token: req.signedCookies });
 };
 
 const login = async (req, res) => {
@@ -44,6 +59,7 @@ const login = async (req, res) => {
   if (!user) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials');
   }
+
   const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials');
@@ -59,10 +75,11 @@ const login = async (req, res) => {
       throw new CustomError.UnauthenticatedError('Invalid Credentials');
     }
     refreshToken = existingToken.refreshToken;
-    attachCookiesToResponse({ res, user: tokenUser, refreshToken });
-    res.status(StatusCodes.OK).json({ user: tokenUser });
+    attachCookiesToResponse({ refreshToken });
+    res.status(StatusCodes.OK).json({ token: req.signedCookies });
     return;
   }
+
   refreshToken = crypto.randomBytes(40).toString('hex');
   const userAgent = req.headers['user-agent'];
   const ip = req.ip;
@@ -70,7 +87,7 @@ const login = async (req, res) => {
   
   await Token.create(userToken);
   attachCookiesToResponse({ res, user: tokenUser, refreshToken });
-  res.status(StatusCodes.OK).json({ user: tokenUser });
+  res.status(StatusCodes.OK).json({ token: req.signedCookies });
 };
 
 const logout = async (req, res) => {
@@ -86,11 +103,11 @@ const logout = async (req, res) => {
     expires: new Date(Date.now()),
   });
 
-  res.status(StatusCodes.OK).json({ msg: 'User logged out!' });
+  res.status(StatusCodes.OK).json({ logout: true });
 };
 
 const verifyAccount = async (req, res) => {
-  const { id, token } = req.query;
+  const { id, token } = req.body;
   const user = await User.findByIdAndUpdate({ _id: id }, { isVerified: true });
 
   if (!user || token !== user.verificationToken) {
@@ -105,7 +122,7 @@ const verifyAccount = async (req, res) => {
 };
 
 const resendMsgToVerify = async (req, res) => {
-  const { email } = req.body;
+  const { email } = req.params;
   const user = await User.findOne({ email });
 
   if (!email) {
@@ -115,16 +132,17 @@ const resendMsgToVerify = async (req, res) => {
     throw new CustomError.UnauthenticatedError('The user is already verified!');
   }
 
-  const message = `<i>Hello, ${user.name}. To complete your sign up, please verify your email: 
-    <a href="http://${process.env.BASE_URL}/verify?token=${user.verificationToken}&id=${user._id}">CLICK</a>.
-    The YuriiTeam!</i>`;
+  const message = 
+    `<i>Hello, ${user.name}. To complete your sign up, please verify your email: 
+    <a href="http://${process.env.CLIENT_URL}/verify?token=${user.verificationToken}&id=${user._id}">CLICK</a>.
+    PUSLE MESSANGER!</i>`;
   await mailSandler(email, 'Verify Your Email', message);
 
   res.status(StatusCodes.OK).json({ message: 'Check your email!' });
 }
 
 const forgotPassword = async (req, res) => {
-  const { email } = req.body;
+  const { email } = req.params;
   const user = await User.findOne({ email });
 
   if (!email) {
@@ -141,8 +159,10 @@ const forgotPassword = async (req, res) => {
   user.passwordTokenExpirationDate = passwordTokenExpirationDate;
   await user.save();
 
-  const message = `<i>Follow the link to reset password: <a href="http://${process.env.BASE_URL}/reset-password?token=${user.passwordToken}&email=${email}">LINK</a>.
-  The YuriiTeam!</i>`;
+  const message = 
+    `<i>Follow the link to reset password: 
+    <a href="http://${process.env.CLIENT_URL}/reset-password?token=${user.passwordToken}&email=${email}">LINK</a>.
+    PUSLE MESSANGER!</i>`;
   await mailSandler(email, 'Reset Password', message);
 
   res.status(StatusCodes.OK).json({ message: 'Check your email!' });
