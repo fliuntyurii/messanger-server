@@ -45,7 +45,7 @@ app.use(
 );
 app.use(helmet());
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: `${process.env.CLIENT_URL}`,
   credentials: true
 }));
 app.use(xss());
@@ -55,6 +55,15 @@ app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 
 app.use(fileUpload());
+
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', `${process.env.CLIENT_URL}`);
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('SameSite', 'none');
+  res.header('Secure', true);
+  next();
+});
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
