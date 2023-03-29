@@ -44,7 +44,9 @@ app.use(
   })
 );
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: 'https://localhost:3000'
+}));
 app.use(xss());
 app.use(mongoSanitize());
 
