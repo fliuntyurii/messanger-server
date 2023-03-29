@@ -45,7 +45,7 @@ const register = async (req, res) => {
   await mailSandler(email, 'Verify Your Email', message);
 
   attachCookiesToResponse({ res, user: tokenUser });
-  res.status(StatusCodes.CREATED).json({ token: req.signedCookies });
+  res.status(StatusCodes.CREATED).json({ user: tokenUser });
 };
 
 const login = async (req, res) => {
@@ -76,7 +76,7 @@ const login = async (req, res) => {
     }
     refreshToken = existingToken.refreshToken;
     attachCookiesToResponse({ refreshToken });
-    res.status(StatusCodes.OK).json({ token: req.signedCookies });
+    res.status(StatusCodes.OK).json({ user: tokenUser });
     return;
   }
 
@@ -87,7 +87,7 @@ const login = async (req, res) => {
   
   await Token.create(userToken);
   attachCookiesToResponse({ res, user: tokenUser, refreshToken });
-  res.status(StatusCodes.OK).json({ token: req.signedCookies });
+  res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 
 const logout = async (req, res) => {
