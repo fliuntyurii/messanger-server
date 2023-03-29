@@ -18,14 +18,16 @@ const attachCookiesToResponse = ({ res, user, refreshToken }) => {
     httpOnly: false,
     signed: true,
     expires: new Date(Date.now() + shortExp),
-    sameSite: 'none'
+    sameSite: 'none',
+    secure: true
   });
 
   res.cookie('refreshToken', refreshTokenJWT, {
     httpOnly: false,
     signed: true,
     expires: new Date(Date.now() + longerExp),
-    sameSite: 'none'
+    sameSite: 'none',
+    secure: true
   });
 };
 
