@@ -30,7 +30,6 @@ const attachCookiesToResponse = ({ res, user, refreshToken }) => {
     secure: false
   });
   
-  res.setHeader('Set-Cookie', `accessToken=${accessTokenJWT};refreshToken=${refreshTokenJWT}; Path=/`)
 };
 
 module.exports = {
