@@ -18,17 +18,19 @@ const attachCookiesToResponse = ({ res, user, refreshToken }) => {
     httpOnly: true,
     signed: true,
     expires: new Date(Date.now() + shortExp),
-    // sameSite: 'none',
-    // secure: true
+    sameSite: 'none',
+    secure: true
   });
 
   res.cookie('refreshToken', refreshTokenJWT, {
     httpOnly: true,
     signed: true,
     expires: new Date(Date.now() + longerExp),
-    // sameSite: 'none',
-    // secure: true
+    sameSite: 'none',
+    secure: true
   });
+  
+  res.setHeader('Set-Cookie', `accessToken=${accessTokenJWT};refreshToken=${refreshTokenJWT}; Path=/; HttpOnly`)
 };
 
 module.exports = {
