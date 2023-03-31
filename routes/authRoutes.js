@@ -9,6 +9,7 @@ const {
   logout, 
   forgotPassword, 
   updateForgottenPassword, 
+  // refreshCookiesOnClient
 } = require('../controllers/authController');
 const { authenticateUser } = require('../middleware/authentication');
 
@@ -27,5 +28,7 @@ router.get('/verifyMessage/:email', authenticateUser, resendMsgToVerify);
 
 router.get('/forgotPassword/:email', forgotPassword);
 router.put('/reset-password', updateForgottenPassword);
+
+// router.post('/refresh', authenticateUser, refreshCookiesOnClient)
 
 module.exports = router;

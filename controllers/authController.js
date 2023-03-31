@@ -50,12 +50,11 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   const { email, password } = req.body;
-
   if (!email || !password) {
     throw new CustomError.BadRequestError('Please provide email and password');
   }
-  const user = await User.findOne({ email });
 
+  const user = await User.findOne({ email });
   if (!user) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials');
   }
@@ -76,6 +75,7 @@ const login = async (req, res) => {
     }
     refreshToken = existingToken.refreshToken;
     attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+
     res.status(StatusCodes.OK).json({ user: tokenUser });
     return;
   }
@@ -87,7 +87,6 @@ const login = async (req, res) => {
   
   await Token.create(userToken);
   attachCookiesToResponse({ res, user: tokenUser, refreshToken });
-  res.cookie('myCookie', 'cookieValue', { sameSite: 'none', secure: true });
   res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 
@@ -197,6 +196,17 @@ const updateForgottenPassword = async (req, res) => {
   res.status(StatusCodes.OK).json({ user: tokenUser });
 }
 
+// const refreshCookiesOnClient = async (req, res) => {
+//   const { refreshCookie } = req.body;
+//   const { refreshToken } = req.signedCookies;
+
+//   if(refreshCookie !== refreshToken) {
+//     throw new CustomError.UnauthenticatedError('Authentication Invalid');
+//   }
+
+//   res.status(StatusCodes.OK).json({ tokens: req.signedCookies });
+// }
+
 module.exports = {
   register,
   login,
@@ -205,4 +215,5 @@ module.exports = {
   logout,
   forgotPassword,
   updateForgottenPassword,
+  // refreshCookiesOnClient
 };
