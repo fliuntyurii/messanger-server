@@ -15,14 +15,12 @@ const attachCookiesToResponse = ({ res, user, refreshToken }) => {
   const longerExp = 1000 * 60 * 60 * 24 * 7;
 
   res.cookie('accessToken', accessTokenJWT, {
-    httpOnly: false,
-    // signed: true,
+    httpOnly: true,
     expires: new Date(Date.now() + shortExp),
   });
 
   res.cookie('refreshToken', refreshTokenJWT, {
-    httpOnly: false,
-    // signed: true,
+    httpOnly: true,
     expires: new Date(Date.now() + longerExp),
   });
 };

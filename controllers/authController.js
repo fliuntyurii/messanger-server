@@ -9,7 +9,7 @@ const CustomError = require('../errors');
 const { attachCookiesToResponse, createTokenUser } = require('../utils');
 
 const register = async (req, res) => {
-  const { email, name, password, username, bio, image } = req.body;
+  const { email, name, password, username, bio, image, language } = req.body;
 
   if (!email || !name || !password) {
     throw new CustomError.BadRequestError('Please provide email and password');
@@ -28,10 +28,11 @@ const register = async (req, res) => {
   const user = await User.create({ 
     email,
     name,
-    username: username || '',
-    bio: bio || '',
-    image: image || '',
+    username,
     password,
+    bio,
+    image,
+    language,
     role,
     verificationToken,
     isVerified
@@ -77,7 +78,6 @@ const login = async (req, res) => {
     attachCookiesToResponse({ res, user: tokenUser, refreshToken });
 
     res.status(StatusCodes.OK).json({ user: tokenUser });
-    // res.status(StatusCodes.OK).json({ tokens: req.signedCookies });
     return;
   }
 
@@ -90,7 +90,6 @@ const login = async (req, res) => {
   attachCookiesToResponse({ res, user: tokenUser, refreshToken });
 
   res.status(StatusCodes.OK).json({ user: tokenUser });
-  // res.status(StatusCodes.OK).json({ tokens: req.signedCookies });
 };
 
 const logout = async (req, res) => {
@@ -198,17 +197,6 @@ const updateForgottenPassword = async (req, res) => {
   attachCookiesToResponse({ res, user: tokenUser });
   res.status(StatusCodes.OK).json({ user: tokenUser });
 }
-
-// const refreshCookiesOnClient = async (req, res) => {
-//   const { refreshCookie } = req.body;
-//   const { refreshToken } = req.signedCookies;
-
-//   if(refreshCookie !== refreshToken) {
-//     throw new CustomError.UnauthenticatedError('Authentication Invalid');
-//   }
-
-//   res.status(StatusCodes.OK).json({ tokens: req.signedCookies });
-// }
 
 module.exports = {
   register,
