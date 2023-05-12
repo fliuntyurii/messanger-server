@@ -1,0 +1,27 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const jwt = require('jsonwebtoken');
+const createJWT = ({ payload }) => {
+    const token = jwt.sign(payload, process.env.JWT_SECRET);
+    return token;
+};
+const isTokenValid = (token) => jwt.verify(token, process.env.JWT_SECRET);
+const attachCookiesToResponse = ({ res, user, refreshToken }) => {
+    const accessTokenJWT = createJWT({ payload: { user } });
+    const refreshTokenJWT = createJWT({ payload: { user, refreshToken } });
+    const shortExp = 1000 * 60 * 60;
+    const longerExp = 1000 * 60 * 60 * 24 * 7;
+    res.cookie('accessToken', accessTokenJWT, {
+        httpOnly: false,
+        expires: new Date(Date.now() + shortExp),
+    });
+    res.cookie('refreshToken', refreshTokenJWT, {
+        httpOnly: false,
+        expires: new Date(Date.now() + longerExp),
+    });
+};
+module.exports = {
+    createJWT,
+    isTokenValid,
+    attachCookiesToResponse,
+};
