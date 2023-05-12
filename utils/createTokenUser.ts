@@ -1,4 +1,6 @@
-const createTokenUser = (user) => {
+import { TUser, TUserToken } from "../types/user.type";
+
+const createTokenUser = (user: TUser): TUserToken => {
   return { 
     name: user.name,
     userId: user._id,
@@ -9,7 +11,8 @@ const createTokenUser = (user) => {
     image: user.image,
     dialogues: user.dialogues,
     language: user.language,
-    username: user.username
+    username: user.username,
+    email: user.email
   };
 };
 

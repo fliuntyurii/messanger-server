@@ -1,23 +1,26 @@
+import { StatusCodes } from 'http-status-codes';
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../types/index.type';
+
 const User = require('../models/User');
-const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const {
   createTokenUser,
   attachCookiesToResponse,
-  checkPermissions,
 } = require('../utils');
 
-const getAllUsers = async (req, res) => {
+const getAllUsers = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const users = await User.find({ role: 'user' }).select('-password');
   res.status(StatusCodes.OK).json({ users });
 };
 
-const getSingleUser = async (req, res) => {
-  const user = await User.findOne({ username: req.body.username }).select('-password');
+const getSingleUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const { username, email } = req.params;
+  const user = username ? await User.findOne({ username }).select('-password') :  await User.findOne({ email }).select('-password');
   if (!user) {
     throw new CustomError.NotFoundError(`No user with username : ${req.body.username}`);
   }
-  checkPermissions(user, user._id);
+
   res.status(StatusCodes.OK).json({ 
     id: user._id,
     email: user.email,
@@ -28,11 +31,11 @@ const getSingleUser = async (req, res) => {
   });
 };
 
-const showCurrentUser = async (req, res) => {
+const showCurrentUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   res.status(StatusCodes.OK).json({ user: req.user });
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { email, name } = req.body;
   if (!email || !name) {
     throw new CustomError.BadRequestError('Please provide all values');
@@ -49,7 +52,7 @@ const updateUser = async (req, res) => {
   res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 
-const updateUserPassword = async (req, res) => {
+const updateUserPassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { oldPassword, newPassword } = req.body;
   if (!oldPassword || !newPassword) {
     throw new CustomError.BadRequestError('Please provide both values');

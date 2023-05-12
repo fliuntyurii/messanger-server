@@ -1,10 +1,13 @@
+import { StatusCodes } from 'http-status-codes';
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../types/index.type';
+
 const Dialogue = require('../models/Dialogue');
 const Message = require('../models/Message');
-const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const User = require('../models/User');
 
-const getDialogue = async (req, res) => {
+const getDialogue = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const user = req.body.id;
   const dialogue = 
     await Dialogue.findById(req.params.id) ||
@@ -30,7 +33,22 @@ const getDialogue = async (req, res) => {
   res.status(StatusCodes.OK).json({ dialogue });
 }
 
-const createDialogue = async (req, res, userId2) => {
+const getAllDialogues = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const ids = req.user.dialogues;
+
+  if(!ids || !ids.length) {
+    throw new CustomError.BadRequestError('Please, provide dialogues ids.');
+  }
+
+  const dialogues = await Dialogue.find({ _id: { $in: ids } });
+  if (!dialogues) {
+    throw new CustomError.NotFoundError(`No dialogues with id : ${ids}`);
+  }
+
+  res.status(StatusCodes.OK).json({ dialogues });
+}
+
+const createDialogue = async (req: AuthenticatedRequest, res: Response, userId2: string): Promise<void> => {
   const userId1 = req.user.userId;
 
   if (!userId2) {
@@ -59,7 +77,7 @@ const createDialogue = async (req, res, userId2) => {
   res.status(StatusCodes.OK).json({ dialogue });
 }
 
-const deleteDialogue = async (req, res) => {
+const deleteDialogue = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const dialogue = await Dialogue.findById(req.params.id);
 
   const user1 = await User.findById(dialogue.users[0]);
@@ -73,9 +91,9 @@ const deleteDialogue = async (req, res) => {
     throw new CustomError.UnauthenticatedError('Invalid Credentials');
   }
 
-  user1.dialogues = user1.dialogues.filter(d => d != String(dialogue._id));
+  user1.dialogues = user1.dialogues.filter((d: string) => d != String(dialogue._id));
   await user1.save();
-  user2.dialogues = user2.dialogues.filter(d => d != String(dialogue._id));
+  user2.dialogues = user2.dialogues.filter((d: string) => d != String(dialogue._id));
   await user2.save();
 
   await Message.deleteMany({ dialogueId: req.params.id });
@@ -86,5 +104,6 @@ const deleteDialogue = async (req, res) => {
 module.exports = {
   getDialogue,
   createDialogue,
-  deleteDialogue
+  deleteDialogue,
+  getAllDialogues
 };

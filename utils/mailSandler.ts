@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-const mailSandler = async (email, subject, text) => {
+const mailSandler = async (email: string, subject: string, text: string): Promise<void> => {
   try {
     const transporter = nodemailer.createTransport({
       host: process.env.HOST,
@@ -19,7 +19,7 @@ const mailSandler = async (email, subject, text) => {
       subject: subject,
       html: text
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log(error.response);
   }
 }

@@ -1,9 +1,12 @@
+import { NextFunction, Response } from "express";
+import { AuthenticatedRequest } from '../types/index.type';
+
 const CustomError = require('../errors');
 const Token = require('../models/Token');
 const { isTokenValid } = require('../utils');
 const { attachCookiesToResponse } = require('../utils');
 
-const authenticateUser = async (req, res, next) => {
+const authenticateUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const { refreshToken, accessToken } = req.cookies;
 
   try {
@@ -30,8 +33,8 @@ const authenticateUser = async (req, res, next) => {
   }
 };
 
-const authorizePermissions = (...roles) => {
-  return (req, res, next) => {
+const authorizePermissions = (...roles: any) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!roles.includes(req.user.role)) {
       throw new CustomError.UnauthorizedError(
         'Unauthorized to access this route'

@@ -1,10 +1,11 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import { TToken } from '../types/token.type';
 
 const Schema = mongoose.Schema;
 
-const tokenSchema = new Schema({
+const tokenSchema = new Schema<TToken>({
   user: {
-    type: mongoose.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   },
@@ -27,4 +28,4 @@ const tokenSchema = new Schema({
 },
 { timestamps: true });
 
-module.exports = mongoose.model('Token', tokenSchema);
+module.exports = mongoose.model<TToken>('Token', tokenSchema);

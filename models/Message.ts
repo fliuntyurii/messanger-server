@@ -1,18 +1,19 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import { TMessage } from '../types/dialogue.type';
 
-const MessageSchema = new mongoose.Schema({
+const MessageSchema = new mongoose.Schema<TMessage>({
   from: {
-    type: mongoose.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   },
   to: {
-    type: mongoose.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   },
   dialogueId: {
-    type: mongoose.Types.ObjectId,
+    type: String,
     ref: 'Dialogue',
     required: true
   },
@@ -32,4 +33,4 @@ const MessageSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('Message', MessageSchema);
+module.exports = mongoose.model<TMessage>('Message', MessageSchema);

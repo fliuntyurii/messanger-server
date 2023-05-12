@@ -14,7 +14,7 @@ const xss = require('xss-clean');
 const cors = require('cors');
 const mongoSanitize = require('express-mongo-sanitize');
 
-const connectDB = require('./db/connect');
+import { connectDB } from './db/connect';
 
 const authRouter = require('./routes/authRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -29,9 +29,9 @@ const server = http.createServer(app);
 const io = require('socket.io')(server);
 
 
-io.on('connection', (socket) => {
+io.on('connection', (socket: any) => {
   console.log('a user connected');
-  socket.on('chat message', (msg) => {
+  socket.on('chat message', (msg: any) => {
     console.log('message: ' + msg);
   });
 });

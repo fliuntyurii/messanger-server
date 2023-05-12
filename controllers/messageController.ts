@@ -1,9 +1,12 @@
+import { StatusCodes } from 'http-status-codes';
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../types/index.type';
+
 const Message = require('../models/Message');
 const Dialogue = require('../models/Dialogue');
-const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 
-const getMessage = async (req, res) => {
+const getMessage = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const message = await Message.findById(req.params.id);
 
   if (!message) {
@@ -17,7 +20,7 @@ const getMessage = async (req, res) => {
   res.status(StatusCodes.OK).json({ message });
 }
 
-const getAllMessages = async (req, res) => {
+const getAllMessages = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const page = Number(req.query.limit) || 1;
   const limit = 20;
 
@@ -36,7 +39,7 @@ const getAllMessages = async (req, res) => {
   res.status(StatusCodes.OK).json({ messages });
 }
 
-const createMessage = async (req, res) => {
+const createMessage = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { text, to, dialogueId } = req.body;
   const dialogue = await Dialogue.findById(dialogueId);
 
@@ -63,7 +66,7 @@ const createMessage = async (req, res) => {
   res.status(StatusCodes.OK).json({ message });
 }
 
-const updateMessage = async (req, res) => {
+const updateMessage = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { text, messageId } = req.body;
   const message = await Message.findById(messageId);
 
@@ -85,7 +88,7 @@ const updateMessage = async (req, res) => {
   res.status(StatusCodes.OK).json({ message });
 }
 
-const deleteMessage = async (req, res) => {
+const deleteMessage = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { id } = req.params;
   const message = await Message.findById(id);
 

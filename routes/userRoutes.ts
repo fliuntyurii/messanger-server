@@ -1,8 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 const {
   authenticateUser,
-  authorizePermissions,
 } = require('../middleware/authentication');
 
 const {
@@ -17,4 +16,5 @@ router.route('/find-user').get(authenticateUser, getSingleUser);
 
 router.route('/updateUser').patch(authenticateUser, updateUser);
 router.route('/updateUserPassword').patch(authenticateUser, updateUserPassword);
+
 module.exports = router;

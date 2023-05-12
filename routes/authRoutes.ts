@@ -1,4 +1,4 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
 const { 
@@ -9,6 +9,7 @@ const {
   logout, 
   forgotPassword, 
   updateForgottenPassword, 
+  isUserExist
 } = require('../controllers/authController');
 const { authenticateUser } = require('../middleware/authentication');
 
@@ -20,9 +21,11 @@ router.route('/showMe').get(authenticateUser, showCurrentUser);
 
 router.post('/register', register);
 router.post('/login', login);
+router.get('/isUserExist', isUserExist);
+
 router.delete('/logout', authenticateUser, logout);
 
-router.put('/verify', verifyAccount);
+router.put('/verify', authenticateUser, verifyAccount);
 router.get('/verifyMessage/:email', authenticateUser, resendMsgToVerify);
 
 router.get('/forgotPassword/:email', forgotPassword);

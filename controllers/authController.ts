@@ -1,6 +1,8 @@
-const { StatusCodes } = require('http-status-codes');
-const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
+import { StatusCodes } from 'http-status-codes';
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../types/index.type';
 
 const mailSandler = require('../utils/mailSandler')
 const User = require('../models/User');
@@ -8,7 +10,7 @@ const Token = require('../models/Token');
 const CustomError = require('../errors');
 const { attachCookiesToResponse, createTokenUser } = require('../utils');
 
-const register = async (req, res) => {
+const register = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { email, name, password, username, bio, image, language } = req.body;
 
   if (!email || !name || !password) {
@@ -20,8 +22,7 @@ const register = async (req, res) => {
     throw new CustomError.BadRequestError('Email already exists');
   }
 
-  const isFirstAccount = (await User.countDocuments({})) === 0;
-  const role = isFirstAccount ? 'admin' : 'user';
+  const role = 'user';
   const verificationToken = crypto.randomBytes(40).toString('hex');
   const isVerified = false;
 
@@ -49,7 +50,7 @@ const register = async (req, res) => {
   res.status(StatusCodes.CREATED).json({ user: tokenUser });
 };
 
-const login = async (req, res) => {
+const login = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { email, password } = req.body;
   if (!email || !password) {
     throw new CustomError.BadRequestError('Please provide email and password');
@@ -92,7 +93,7 @@ const login = async (req, res) => {
   res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 
-const logout = async (req, res) => {
+const logout = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   await Token.findOneAndDelete({ user: req.user.userId });
 
   res.cookie('accessToken', 'logout', {
@@ -108,7 +109,7 @@ const logout = async (req, res) => {
   res.status(StatusCodes.OK).json({ logout: true });
 };
 
-const verifyAccount = async (req, res) => {
+const verifyAccount = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { id, token } = req.body;
   const user = await User.findByIdAndUpdate({ _id: id }, { isVerified: true });
 
@@ -123,13 +124,13 @@ const verifyAccount = async (req, res) => {
   res.status(StatusCodes.OK).json({ message: 'Email verified success!' });
 };
 
-const resendMsgToVerify = async (req, res) => {
+const resendMsgToVerify = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { email } = req.params;
-  const user = await User.findOne({ email });
-
   if (!email) {
     throw new CustomError.BadRequestError('Please provide email and password');
   }
+
+  const user = await User.findOne({ email });
   if (user.isVerified) {
     throw new CustomError.UnauthenticatedError('The user is already verified!');
   }
@@ -139,17 +140,16 @@ const resendMsgToVerify = async (req, res) => {
     <a href="http://${process.env.CLIENT_URL}/verify?token=${user.verificationToken}&id=${user._id}">CLICK</a>.
     PUSLE MESSANGER!</i>`;
   await mailSandler(email, 'Verify Your Email', message);
-
   res.status(StatusCodes.OK).json({ message: 'Check your email!' });
 }
 
-const forgotPassword = async (req, res) => {
+const forgotPassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { email } = req.params;
-  const user = await User.findOne({ email });
-
   if (!email) {
     throw new CustomError.BadRequestError('Please provide email');
   }
+
+  const user = await User.findOne({ email });
   if (!user) {
     throw new CustomError.NotFoundError(`No user with email : ${email}`);
   }
@@ -170,18 +170,18 @@ const forgotPassword = async (req, res) => {
   res.status(StatusCodes.OK).json({ message: 'Check your email!' });
 }
 
-const updateForgottenPassword = async (req, res) => {
+const updateForgottenPassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { token, email } = req.query;
-  const { password, confirmPassword } = req.body;
+  const { password } = req.body;
 
   const salt = await bcrypt.genSalt(10);
   const hashPassword = await bcrypt.hash(password, salt);
-  const user = await User.findOneAndUpdate({ email }, { password: hashPassword });
+  const user = await User.findOne({ email });
 
-  if (!password || !confirmPassword) {
+  if (!password) {
     throw new CustomError.BadRequestError('Please provide password');
   }
-  if (!user || password !== confirmPassword) {
+  if (!user) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials');
   }
   if (user.passwordToken !== token) {
@@ -198,6 +198,22 @@ const updateForgottenPassword = async (req, res) => {
   res.status(StatusCodes.OK).json({ user: tokenUser });
 }
 
+const isUserExist = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const { username, email } = req.query;
+  let user;
+  if(username) {
+    user = await User.findOne({ username });
+  }
+  if(email) {
+    user = await User.findOne({ email });
+  }
+  if(!user) {
+    res.status(StatusCodes.OK).json({ exist: false });
+    return;
+  }
+  res.status(StatusCodes.OK).json({ exist: true });
+}
+
 module.exports = {
   register,
   login,
@@ -206,5 +222,5 @@ module.exports = {
   logout,
   forgotPassword,
   updateForgottenPassword,
-  // refreshCookiesOnClient
+  isUserExist
 };

@@ -1,12 +1,15 @@
+import { NextFunction, Response } from "express";
+import { AuthenticatedRequest, TError } from "../types/index.type";
+
 const { StatusCodes } = require('http-status-codes');
-const errorHandlerMiddleware = (err, req, res, next) => {
+const errorHandlerMiddleware = (err: TError, req: AuthenticatedRequest, res: Response, next: NextFunction): Response<any, Record<string, any>> => {
   let customError = {
     statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
     msg: err.message || 'Something went wrong try again later',
   };
   if (err.name === 'ValidationError') {
     customError.msg = Object.values(err.errors)
-      .map((item) => item.message)
+      .map((item: any) => item.message)
       .join(',');
     customError.statusCode = 400;
   }
