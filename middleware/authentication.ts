@@ -1,33 +1,40 @@
 import { NextFunction, Response } from "express";
 import { AuthenticatedRequest } from '../types/index.type';
+import CustomError from '../errors';
+import { Token } from '../models/Token';
+import { isTokenValid } from '../utils';
+import { attachCookiesToResponse } from '../utils';
 
-const CustomError = require('../errors');
-const Token = require('../models/Token');
-const { isTokenValid } = require('../utils');
-const { attachCookiesToResponse } = require('../utils');
-
-const authenticateUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const authenticateUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   const { refreshToken, accessToken } = req.cookies;
 
   try {
     if(accessToken) {
       const payload = isTokenValid(accessToken);
-      req.user = payload.user;
-      return next();
+      if (typeof payload !== 'string') {
+        req.user = payload.user;
+        return next();
+      }
     }
+    
     const payload = isTokenValid(refreshToken);
-    const existingToken = await Token.findOne({
-      user: payload.user.userId,
-      refreshToken: payload.refreshToken
-    });
-
-    if(!existingToken || !existingToken?.isValid) {
+    if (typeof payload === 'string') {
       throw new CustomError.UnauthenticatedError('Authentication Invalid');
     }
-
-    attachCookiesToResponse({ res, user: payload.user, refreshToken: existingToken.refreshToken });
-    req.user = payload.user;
-    next();
+    else {
+      const existingToken = await Token.findOne({
+        user: payload.user.userId,
+        refreshToken: payload.refreshToken
+      });
+  
+      if(!existingToken || !existingToken?.isValid) {
+        throw new CustomError.UnauthenticatedError('Authentication Invalid');
+      }
+  
+      attachCookiesToResponse({ res, user: payload.user, refreshToken: existingToken.refreshToken });
+      req.user = payload.user;
+      next();
+    }
   } catch (error) {
     throw new CustomError.UnauthenticatedError('Authentication Invalid');
   }
@@ -44,7 +51,7 @@ const authorizePermissions = (...roles: any) => {
   };
 };
 
-module.exports = {
+export {
   authenticateUser,
   authorizePermissions,
 };

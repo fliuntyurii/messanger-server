@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-const { 
+import { 
   register, 
   login, 
   verifyAccount, 
@@ -10,12 +10,12 @@ const {
   forgotPassword, 
   updateForgottenPassword, 
   isUserExist
-} = require('../controllers/authController');
-const { authenticateUser } = require('../middleware/authentication');
+} from '../controllers/authController';
+import { authenticateUser } from '../middleware/authentication';
 
-const {
+import {
   showCurrentUser,
-} = require('../controllers/userController');
+} from '../controllers/userController';
 
 router.route('/showMe').get(authenticateUser, showCurrentUser);
 
@@ -31,4 +31,4 @@ router.get('/verifyMessage/:email', authenticateUser, resendMsgToVerify);
 router.get('/forgotPassword/:email', forgotPassword);
 router.put('/reset-password', updateForgottenPassword);
 
-module.exports = router;
+export default router;

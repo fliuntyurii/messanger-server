@@ -1,28 +1,26 @@
 require('dotenv').config();
 require('express-async-errors');
+const rateLimit =  require('express-rate-limit');
 
-const express = require('express');
-const socketio = require('socket.io');
-const http = require('http');
-const mongoose = require('mongoose');
+import express from 'express';
+import http from 'http';
+import mongoose from 'mongoose';
 
-const cookieParser = require('cookie-parser');
-const fileUpload = require('express-fileupload');
-const rateLimiter = require('express-rate-limit');
-const helmet = require('helmet');
-const xss = require('xss-clean');
-const cors = require('cors');
-const mongoSanitize = require('express-mongo-sanitize');
+import cookieParser from 'cookie-parser';
+import fileUpload from 'express-fileupload';
+import helmet from 'helmet';
+import cors from 'cors';
+import mongoSanitize from 'express-mongo-sanitize';
 
 import { connectDB } from './db/connect';
 
-const authRouter = require('./routes/authRoutes');
-const userRouter = require('./routes/userRoutes');
-const messageRouter = require('./routes/messageRoutes');
-const dialogueRouter = require('./routes/dialogueRoutes');
+import authRouter from './routes/authRoutes';
+import userRouter from './routes/userRoutes';
+import messageRouter from './routes/messageRoutes';
+import dialogueRouter from './routes/dialogueRoutes';
 
-const notFoundMiddleware = require('./middleware/not-found');
-const errorHandlerMiddleware = require('./middleware/error-handler');
+import notFoundMiddleware from './middleware/not-found';
+import errorHandlerMiddleware from './middleware/error-handler';
 
 const app = express();
 const server = http.createServer(app);
@@ -38,7 +36,7 @@ io.on('connection', (socket: any) => {
 
 app.set('trust proxy', 1);
 app.use(
-  rateLimiter({
+  rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 60,
   })
@@ -48,7 +46,6 @@ app.use(cors({
   origin: `${process.env.CLIENT_URL}`,
   credentials: true
 }));
-app.use(xss());
 app.use(mongoSanitize());
 
 app.use(express.json());
@@ -69,7 +66,7 @@ mongoose.set('strictQuery', true);
 const port = process.env.PORT || 5000;
 const start = async () => {
   try {
-    await connectDB(process.env.MONGO_URL);
+    await connectDB(process.env.MONGO_URL || '');
     
     server.listen(port, () =>
       console.log(`Server is listening on port ${port}...`)

@@ -1,13 +1,15 @@
 import { TAttachCookies, TCreateJWT } from '../types/token.type';
-
-const jwt = require('jsonwebtoken');
+import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 
 const createJWT = ({ payload }: TCreateJWT): string => {
-  const token = jwt.sign(payload, process.env.JWT_SECRET);
+  const token = jwt.sign(payload, process.env.JWT_SECRET as string);
   return token;
 };
 
-const isTokenValid = (token: string): void => jwt.verify(token, process.env.JWT_SECRET);
+const isTokenValid = (token: string): string | JwtPayload => {
+  const secret: Secret = process.env.JWT_SECRET || 'default-secret';
+  return jwt.verify(token, secret) as string | JwtPayload;;
+}
 
 const attachCookiesToResponse = ({ res, user, refreshToken }: TAttachCookies): void => {
   const accessTokenJWT = createJWT({ payload: { user } });
@@ -27,7 +29,7 @@ const attachCookiesToResponse = ({ res, user, refreshToken }: TAttachCookies): v
   });
 };
 
-module.exports = {
+export {
   createJWT,
   isTokenValid,
   attachCookiesToResponse,

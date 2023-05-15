@@ -16,4 +16,4 @@ const createTokenUser = (user: TUser): TUserToken => {
   };
 };
 
-module.exports = createTokenUser;
+export { createTokenUser };

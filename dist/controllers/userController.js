@@ -8,20 +8,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.updateUserPassword = exports.updateUser = exports.showCurrentUser = exports.getSingleUser = exports.getAllUsers = void 0;
 const http_status_codes_1 = require("http-status-codes");
-const User = require('../models/User');
-const CustomError = require('../errors');
-const { createTokenUser, attachCookiesToResponse, } = require('../utils');
+const User_1 = require("../models/User");
+const errors_1 = __importDefault(require("../errors"));
+const utils_1 = require("../utils");
 const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield User.find({ role: 'user' }).select('-password');
+    const users = yield User_1.User.find({ role: 'user' }).select('-password');
     res.status(http_status_codes_1.StatusCodes.OK).json({ users });
 });
+exports.getAllUsers = getAllUsers;
 const getSingleUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, email } = req.params;
-    const user = username ? yield User.findOne({ username }).select('-password') : yield User.findOne({ email }).select('-password');
+    const user = username ? yield User_1.User.findOne({ username }).select('-password') : yield User_1.User.findOne({ email }).select('-password');
     if (!user) {
-        throw new CustomError.NotFoundError(`No user with username : ${req.body.username}`);
+        throw new errors_1.default.NotFoundError(`No user with username : ${req.body.username}`);
     }
     res.status(http_status_codes_1.StatusCodes.OK).json({
         id: user._id,
@@ -32,40 +37,42 @@ const getSingleUser = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         image: user.image
     });
 });
+exports.getSingleUser = getSingleUser;
 const showCurrentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.status(http_status_codes_1.StatusCodes.OK).json({ user: req.user });
 });
+exports.showCurrentUser = showCurrentUser;
 const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, name } = req.body;
     if (!email || !name) {
-        throw new CustomError.BadRequestError('Please provide all values');
+        throw new errors_1.default.BadRequestError('Please provide all values');
     }
-    const user = yield User.findOne({ _id: req.user.userId });
+    const user = yield User_1.User.findOne({ _id: req.user.userId });
+    if (!user) {
+        throw new errors_1.default.NotFoundError('User doesn\'t exist');
+    }
     user.email = email;
     user.name = name;
     yield user.save();
-    const tokenUser = createTokenUser(user);
-    attachCookiesToResponse({ res, user: tokenUser });
+    const tokenUser = (0, utils_1.createTokenUser)(user);
+    (0, utils_1.attachCookiesToResponse)({ res, user: tokenUser });
     res.status(http_status_codes_1.StatusCodes.OK).json({ user: tokenUser });
 });
+exports.updateUser = updateUser;
 const updateUserPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { oldPassword, newPassword } = req.body;
     if (!oldPassword || !newPassword) {
-        throw new CustomError.BadRequestError('Please provide both values');
+        throw new errors_1.default.BadRequestError('Please provide both values');
     }
-    const user = yield User.findOne({ _id: req.user.userId });
-    const isPasswordCorrect = yield user.comparePassword(oldPassword);
+    const user = yield User_1.User.findOne({ _id: req.user.userId });
+    const isPasswordCorrect = yield (user === null || user === void 0 ? void 0 : user.comparePassword(oldPassword));
     if (!isPasswordCorrect) {
-        throw new CustomError.UnauthenticatedError('Invalid Credentials');
+        throw new errors_1.default.UnauthenticatedError('Invalid Credentials');
     }
-    user.password = newPassword;
-    yield user.save();
+    if (user) {
+        user.password = newPassword;
+        yield user.save();
+    }
     res.status(http_status_codes_1.StatusCodes.OK).json({ msg: 'Success! Password Updated.' });
 });
-module.exports = {
-    getAllUsers,
-    getSingleUser,
-    showCurrentUser,
-    updateUser,
-    updateUserPassword,
-};
+exports.updateUserPassword = updateUserPassword;

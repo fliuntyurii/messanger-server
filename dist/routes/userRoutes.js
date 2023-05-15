@@ -5,10 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
-const { authenticateUser, } = require('../middleware/authentication');
-const { getAllUsers, getSingleUser, updateUser, updateUserPassword, } = require('../controllers/userController');
-router.route('/').get(authenticateUser, getAllUsers);
-router.route('/find-user').get(authenticateUser, getSingleUser);
-router.route('/updateUser').patch(authenticateUser, updateUser);
-router.route('/updateUserPassword').patch(authenticateUser, updateUserPassword);
-module.exports = router;
+const authentication_1 = require("../middleware/authentication");
+const userController_1 = require("../controllers/userController");
+router.route('/').get(authentication_1.authenticateUser, userController_1.getAllUsers);
+router.route('/find-user').get(authentication_1.authenticateUser, userController_1.getSingleUser);
+router.route('/updateUser').patch(authentication_1.authenticateUser, userController_1.updateUser);
+router.route('/updateUserPassword').patch(authentication_1.authenticateUser, userController_1.updateUserPassword);
+exports.default = router;

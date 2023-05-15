@@ -1,11 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
 import { Response } from 'express';
-import { AuthenticatedRequest } from '../types/index.type';
 
-const Dialogue = require('../models/Dialogue');
-const Message = require('../models/Message');
-const CustomError = require('../errors');
-const User = require('../models/User');
+import { AuthenticatedRequest } from '../types/index.type';
+import { Dialogue } from '../models/Dialogue';
+import { Message } from '../models/Message';
+import CustomError from '../errors';
+import { User } from '../models/User';
 
 const getDialogue = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const user = req.body.id;
@@ -22,7 +22,8 @@ const getDialogue = async (req: AuthenticatedRequest, res: Response): Promise<vo
     if (!user) {
       throw new CustomError.BadRequestError('Please, provide user id to create dialogue.');
     }
-    createDialogue(req, res, user);
+    req.userId2 = user;
+    createDialogue(req, res);
     return;
   }
 
@@ -48,8 +49,9 @@ const getAllDialogues = async (req: AuthenticatedRequest, res: Response): Promis
   res.status(StatusCodes.OK).json({ dialogues });
 }
 
-const createDialogue = async (req: AuthenticatedRequest, res: Response, userId2: string): Promise<void> => {
+const createDialogue = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const userId1 = req.user.userId;
+  const userId2 = req.userId2;
 
   if (!userId2) {
     throw new CustomError.BadRequestError('Please, provide user id.');
@@ -69,10 +71,12 @@ const createDialogue = async (req: AuthenticatedRequest, res: Response, userId2:
     messages: []
   });
 
-  user1.dialogues.push(String(dialogue._id));
-  await user1.save();
-  user2.dialogues.push(String(dialogue._id));
-  await user2.save();
+  if(user1 && user2) {
+    user1.dialogues = [...user1.dialogues, String(dialogue._id)]; 
+    await user1.save();
+    user2.dialogues = [...user2.dialogues, String(dialogue._id)];
+    await user2.save();
+  }
 
   res.status(StatusCodes.OK).json({ dialogue });
 }
@@ -80,8 +84,8 @@ const createDialogue = async (req: AuthenticatedRequest, res: Response, userId2:
 const deleteDialogue = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const dialogue = await Dialogue.findById(req.params.id);
 
-  const user1 = await User.findById(dialogue.users[0]);
-  const user2 = await User.findById(dialogue.users[1]);
+  const user1 = await User.findById(dialogue?.users[0]);
+  const user2 = await User.findById(dialogue?.users[1]);
 
   if (!dialogue) {
     throw new CustomError.NotFoundError(`No dialogue with id : ${req.params.id}`);
@@ -91,17 +95,19 @@ const deleteDialogue = async (req: AuthenticatedRequest, res: Response): Promise
     throw new CustomError.UnauthenticatedError('Invalid Credentials');
   }
 
-  user1.dialogues = user1.dialogues.filter((d: string) => d != String(dialogue._id));
-  await user1.save();
-  user2.dialogues = user2.dialogues.filter((d: string) => d != String(dialogue._id));
-  await user2.save();
+  if(user1 && user2) {
+    user1.dialogues = user1.dialogues.filter((d: string) => d != String(dialogue._id));
+    await user1.save();
+    user2.dialogues = user2.dialogues.filter((d: string) => d != String(dialogue._id));
+    await user2.save();
+  }
 
   await Message.deleteMany({ dialogueId: req.params.id });
   await Dialogue.findByIdAndDelete(req.params.id);
   res.status(StatusCodes.OK).json({ message: true });
 }
 
-module.exports = {
+export {
   getDialogue,
   createDialogue,
   deleteDialogue,

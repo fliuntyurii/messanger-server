@@ -1,10 +1,10 @@
 import { StatusCodes } from 'http-status-codes';
 import { Response } from 'express';
-import { AuthenticatedRequest } from '../types/index.type';
 
-const Message = require('../models/Message');
-const Dialogue = require('../models/Dialogue');
-const CustomError = require('../errors');
+import { AuthenticatedRequest } from '../types/index.type';
+import { Message } from '../models/Message';
+import { Dialogue } from '../models/Dialogue';
+import CustomError from '../errors';
 
 const getMessage = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const message = await Message.findById(req.params.id);
@@ -32,7 +32,7 @@ const getAllMessages = async (req: AuthenticatedRequest, res: Response): Promise
     throw new CustomError.NotFoundError(`No dialogue with id : ${dialogueId}`);
   }
 
-  if (!dialogue.users.includes(req.user.userId)) {
+  if (!dialogue?.users.includes(req.user.userId)) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials');
   }
 
@@ -104,7 +104,7 @@ const deleteMessage = async (req: AuthenticatedRequest, res: Response): Promise<
   res.status(StatusCodes.OK).json({ message: true });
 }
 
-module.exports = {
+export {
   getMessage,
   getAllMessages,
   createMessage,

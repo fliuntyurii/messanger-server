@@ -8,10 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const nodemailer = require('nodemailer');
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.mailSandler = void 0;
+const nodemailer_1 = __importDefault(require("nodemailer"));
 const mailSandler = (email, subject, text) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const transporter = nodemailer.createTransport({
+        const transporter = nodemailer_1.default.createTransport({
             host: process.env.HOST,
             service: process.env.SERVICE,
             port: 587,
@@ -32,4 +37,4 @@ const mailSandler = (email, subject, text) => __awaiter(void 0, void 0, void 0, 
         console.log(error.response);
     }
 });
-module.exports = mailSandler;
+exports.mailSandler = mailSandler;

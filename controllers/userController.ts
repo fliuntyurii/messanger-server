@@ -1,13 +1,13 @@
 import { StatusCodes } from 'http-status-codes';
 import { Response } from 'express';
-import { AuthenticatedRequest } from '../types/index.type';
 
-const User = require('../models/User');
-const CustomError = require('../errors');
-const {
+import { AuthenticatedRequest } from '../types/index.type';
+import { User } from '../models/User';
+import CustomError from '../errors';
+import {
   createTokenUser,
   attachCookiesToResponse,
-} = require('../utils');
+} from '../utils';
 
 const getAllUsers = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const users = await User.find({ role: 'user' }).select('-password');
@@ -42,9 +42,13 @@ const updateUser = async (req: AuthenticatedRequest, res: Response): Promise<voi
   }
   const user = await User.findOne({ _id: req.user.userId });
 
+  if(!user) {
+    throw new CustomError.NotFoundError('User doesn\'t exist');
+  }
+
   user.email = email;
   user.name = name;
-
+  
   await user.save();
 
   const tokenUser = createTokenUser(user);
@@ -59,17 +63,19 @@ const updateUserPassword = async (req: AuthenticatedRequest, res: Response): Pro
   }
   const user = await User.findOne({ _id: req.user.userId });
 
-  const isPasswordCorrect = await user.comparePassword(oldPassword);
+  const isPasswordCorrect = await user?.comparePassword(oldPassword);
   if (!isPasswordCorrect) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials');
   }
-  user.password = newPassword;
 
-  await user.save();
+  if(user) {
+    user.password = newPassword;
+    await user.save();
+  }
   res.status(StatusCodes.OK).json({ msg: 'Success! Password Updated.' });
 };
 
-module.exports = {
+export {
   getAllUsers,
   getSingleUser,
   showCurrentUser,

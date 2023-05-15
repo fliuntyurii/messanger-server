@@ -68,9 +68,9 @@ UserSchema.pre<TUser>('save', async function () {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-UserSchema.methods.comparePassword = async function (canditatePassword: string) {
+UserSchema.methods.comparePassword = async function (canditatePassword: string): Promise<boolean> {
   const isMatch = await bcrypt.compare(canditatePassword, this.password);
   return isMatch;
 };
 
-module.exports = mongoose.model<TUser>('User', UserSchema);
+export const User = mongoose.model<TUser>('User', UserSchema);

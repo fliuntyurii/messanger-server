@@ -9,7 +9,7 @@ export type TUserToken = {
   isVerified: boolean;
   bio: string;
   image: string;
-  dialogues: TDialogue[] | [];
+  dialogues: string[] | [];
   language: string;
   username: string;
   email: string;
@@ -27,8 +27,10 @@ export interface TUser extends mongoose.Document {
   verified?: Date;
   passwordToken?: string;
   passwordTokenExpirationDate?: Date;
-  dialogues: TDialogue[] | [];
+  dialogues: string[] | [];
   language: string;
   image: string;
   bio: string;
+
+  comparePassword: (password: string) => Promise<boolean>;
 }

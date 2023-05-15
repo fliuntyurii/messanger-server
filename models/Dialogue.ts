@@ -12,4 +12,4 @@ const DialogueSchema = new mongoose.Schema<TDialogue>({
   }
 });
 
-module.exports = mongoose.model<TDialogue>('Dialogue', DialogueSchema);
+export const Dialogue = mongoose.model<TDialogue>('Dialogue', DialogueSchema);

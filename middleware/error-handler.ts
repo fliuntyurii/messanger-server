@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import { AuthenticatedRequest, TError } from "../types/index.type";
+import { StatusCodes } from 'http-status-codes';
 
-const { StatusCodes } = require('http-status-codes');
 const errorHandlerMiddleware = (err: TError, req: AuthenticatedRequest, res: Response, next: NextFunction): Response<any, Record<string, any>> => {
   let customError = {
     statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
@@ -27,4 +27,4 @@ const errorHandlerMiddleware = (err: TError, req: AuthenticatedRequest, res: Res
   return res.status(customError.statusCode).json({ msg: customError.msg });
 };
 
-module.exports = errorHandlerMiddleware;
+export default errorHandlerMiddleware;

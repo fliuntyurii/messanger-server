@@ -4,7 +4,7 @@ import { TUserToken } from "./user.type";
 export type TAttachCookies = {
   res: Response;
   user: TUserToken;
-  refreshToken: string;
+  refreshToken?: string;
 }
 
 export type TCreateJWT = {

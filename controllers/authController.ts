@@ -2,13 +2,13 @@ import { StatusCodes } from 'http-status-codes';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { Response } from 'express';
-import { AuthenticatedRequest } from '../types/index.type';
 
-const mailSandler = require('../utils/mailSandler')
-const User = require('../models/User');
-const Token = require('../models/Token');
-const CustomError = require('../errors');
-const { attachCookiesToResponse, createTokenUser } = require('../utils');
+import { AuthenticatedRequest } from '../types/index.type';
+import { mailSandler } from '../utils/mailSandler';
+import { User } from '../models/User';
+import { Token } from '../models/Token';
+import CustomError from '../errors';
+import { attachCookiesToResponse, createTokenUser } from '../utils';
 
 const register = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { email, name, password, username, bio, image, language } = req.body;
@@ -131,13 +131,13 @@ const resendMsgToVerify = async (req: AuthenticatedRequest, res: Response): Prom
   }
 
   const user = await User.findOne({ email });
-  if (user.isVerified) {
+  if (user?.isVerified) {
     throw new CustomError.UnauthenticatedError('The user is already verified!');
   }
 
   const message = 
-    `<i>Hello, ${user.name}. To complete your sign up, please verify your email: 
-    <a href="http://${process.env.CLIENT_URL}/verify?token=${user.verificationToken}&id=${user._id}">CLICK</a>.
+    `<i>Hello, ${user?.name}. To complete your sign up, please verify your email: 
+    <a href="http://${process.env.CLIENT_URL}/verify?token=${user?.verificationToken}&id=${user?._id}">CLICK</a>.
     PUSLE MESSANGER!</i>`;
   await mailSandler(email, 'Verify Your Email', message);
   res.status(StatusCodes.OK).json({ message: 'Check your email!' });
@@ -189,8 +189,8 @@ const updateForgottenPassword = async (req: AuthenticatedRequest, res: Response)
   }
 
   user.password = hashPassword;
-  user.passwordToken = null;
-  user.passwordTokenExpirationDate = null;
+  user.passwordToken = undefined;
+  user.passwordTokenExpirationDate = undefined;
 
   await user.save();
   const tokenUser = createTokenUser(user);
@@ -214,7 +214,7 @@ const isUserExist = async (req: AuthenticatedRequest, res: Response): Promise<vo
   res.status(StatusCodes.OK).json({ exist: true });
 }
 
-module.exports = {
+export {
   register,
   login,
   verifyAccount,

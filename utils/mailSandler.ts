@@ -1,6 +1,6 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
-const mailSandler = async (email: string, subject: string, text: string): Promise<void> => {
+export const mailSandler = async (email: string, subject: string, text: string): Promise<void> => {
   try {
     const transporter = nodemailer.createTransport({
       host: process.env.HOST,
@@ -23,5 +23,3 @@ const mailSandler = async (email: string, subject: string, text: string): Promis
     console.log(error.response);
   }
 }
-
-module.exports = mailSandler;

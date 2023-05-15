@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createTokenUser = void 0;
 const createTokenUser = (user) => {
     return {
         name: user.name,
@@ -15,4 +16,4 @@ const createTokenUser = (user) => {
         email: user.email
     };
 };
-module.exports = createTokenUser;
+exports.createTokenUser = createTokenUser;

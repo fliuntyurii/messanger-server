@@ -1,13 +1,10 @@
 import { TUserToken } from "../types/user.type";
+import CustomError from '../errors';
 
-const CustomError = require('../errors');
-
-const chechPermissions = (requestUser: TUserToken, resourceUserId: string) => {
+export const checkPermissions = (requestUser: TUserToken, resourceUserId: string) => {
   if (requestUser.role === 'admin' || requestUser.role === 'user' ) return;
   if (requestUser.userId === resourceUserId.toString()) return;
   throw new CustomError.UnauthorizedError(
     'Not authorized to access this route'
   );
 };
-
-module.exports = chechPermissions;
