@@ -34,13 +34,14 @@ io.on('connection', (socket: any) => {
   });
 });
 
-app.set('trust proxy', 1);
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 60,
   })
 );
+
+app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({
   origin: `${process.env.CLIENT_URL}`,
